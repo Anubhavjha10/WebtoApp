@@ -41,10 +41,9 @@
 
         // Check if the icon was uploaded or is a URL
         if (iconParam === 'uploaded') {
-            // If it was uploaded, get the data from session storage
-            finalIconUrl = sessionStorage.getItem('userIconData');
-            // Clean up the storage after using it
-            sessionStorage.removeItem('userIconData');
+            // If it was uploaded, get the data from LOCAL storage
+            finalIconUrl = localStorage.getItem('userIconData');
+            // We don't remove it from local storage, so it's available when the app restarts
         } else {
             // If it was a URL, use it directly
             finalIconUrl = iconParam;
@@ -73,7 +72,6 @@
 
             // Create a data URL for the manifest and inject it into the head
             const manifestString = JSON.stringify(manifest);
-            // Updated btoa to handle Unicode characters correctly
             const manifestUrl = 'data:application/json;base64,' + btoa(unescape(encodeURIComponent(manifestString)));
             const link = document.createElement('link');
             link.rel = 'manifest';

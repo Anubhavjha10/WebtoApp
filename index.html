@@ -49,11 +49,6 @@
                             <span class="ml-2 font-bold text-xl text-gray-800">WebToApp</span>
                         </div>
                     </div>
-                    <div class="hidden md:ml-6 md:flex md:items-center space-x-8">
-                        <a href="#" class="text-gray-700 hover:text-primary-500 px-3 py-2 text-sm font-medium">Home</a>
-                        <a href="#converter" class="text-gray-700 hover:text-primary-500 px-3 py-2 text-sm font-medium">How It Works</a>
-                        <a href="#features" class="text-gray-700 hover:text-primary-500 px-3 py-2 text-sm font-medium">Features</a>
-                    </div>
                     <div class="-mr-2 flex items-center md:hidden">
                         <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500" aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-button">
                             <i data-feather="menu"></i>
@@ -64,8 +59,6 @@
             <div class="hidden md:hidden bg-white/95 backdrop-blur-md" id="mobile-menu">
                 <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                     <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-500 hover:bg-gray-50">Home</a>
-                    <a href="#converter" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-500 hover:bg-gray-50">How It Works</a>
-                    <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-500 hover:bg-gray-50">Features</a>
                 </div>
             </div>
         </nav>
@@ -246,7 +239,7 @@
             }
         }
 
-        // --- Form Submission Handler (The New Logic) ---
+        // --- Form Submission Handler ---
         document.getElementById('convert-form').addEventListener('submit', function(event) {
             event.preventDefault();
             generateApp();
@@ -267,11 +260,11 @@
 
             // Check if user uploaded an image
             if (iconPreviewImg && iconPreviewImg.src.startsWith('data:image')) {
-                // Store the large image data in session storage instead of the URL
-                sessionStorage.setItem('userIconData', iconPreviewImg.src);
-                params.append('icon', 'uploaded'); // Send a signal word in the URL
+                // Store the large image data in LOCAL storage
+                localStorage.setItem('userIconData', iconPreviewImg.src);
+                params.append('icon', 'uploaded'); 
             } else if (iconUrlInput) {
-                params.append('icon', iconUrlInput); // Send the icon URL as before
+                params.append('icon', iconUrlInput); 
             } else {
                 alert("Please provide an App Icon URL or upload an icon.");
                 return;
