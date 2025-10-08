@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading App...</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: sans-serif; }
+        iframe { width: 100%; height: 100%; border: none; }
+        #install-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: none; /* Hidden by default */
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <iframe id="app-frame" src=""></iframe>
+    <button id="install-button">Install App</button>
+
+    <script>
+        // Get parameters from the URL
+        const params = new URLSearchParams(window.location.search);
+        const appName = params.get('name');
+        const websiteUrl = params.get('url');
+        const themeColor = params.get('theme');
+        const iconParam = params.get('icon'); 
+
+        let finalIconUrl;
+
+        // Check if the icon was uploaded or is a URL
+        if (iconParam === 'uploaded') {
+            // If it was uploaded, get the data from session storage
+            finalIconUrl = sessionStorage.getItem('userIconData');
+            // Clean up the storage after using it
+            sessionStorage.removeItem('userIconData');
+        } else {
+            // If it was a URL, use it directly
+            finalIconUrl = iconParam;
+        }
+
+        if (!websiteUrl || !finalIconUrl) {
+            document.body.innerHTML = '<h1>Error: Missing data to create the app. Please go back and try again.</h1>';
+        } else {
+            // Set the page title and iframe source
+            document.title = appName || 'Web App';
+            document.getElementById('app-frame').src = websiteUrl;
+
+            // Dynamically create the manifest content
+            const manifest = {
+                "short_name": appName,
+                "name": appName,
+                "icons": [
+                    { "src": finalIconUrl, "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+                    { "src": finalIconUrl, "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+                ],
+                "start_url": window.location.href,
+                "display": "standalone",
+                "theme_color": themeColor,
+                "background_color": "#ffffff"
+            };
+
+            // Create a data URL for the manifest and inject it into the head
+            const manifestString = JSON.stringify(manifest);
+            // Updated btoa to handle Unicode characters correctly
+            const manifestUrl = 'data:application/json;base64,' + btoa(unescape(encodeURIComponent(manifestString)));
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestUrl;
+            document.head.appendChild(link);
+
+            // Register the service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('Service Worker registered successfully.'))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            }
+
+            // Handle the custom install button
+            let deferredPrompt;
+            const installButton = document.getElementById('install-button');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installButton.style.display = 'block';
+            });
+
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    installButton.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
